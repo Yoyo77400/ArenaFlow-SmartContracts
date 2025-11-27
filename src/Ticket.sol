@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import { Context } from "@openzeppelin/contracts/utils/Context.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { Pausable } from "@openzeppelin/contracts/utils/Pausable.sol";
@@ -31,11 +32,21 @@ contract Ticket is ERC721, AccessControl, Pausable, ReentrancyGuard, ERC2771Cont
         treasury = payable(msg.sender);
     }
 
+    function _contextSuffixLength()
+    internal
+    view
+    virtual
+    override(Context, ERC2771Context)
+    returns (uint256)
+{
+    return ERC2771Context._contextSuffixLength();
+}
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Context) returns (address sender) {
+    function _msgSender() internal view virtual override(Context, ERC2771Context) returns (address sender) {
         return ERC2771Context._msgSender();
     }
 

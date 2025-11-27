@@ -16,6 +16,10 @@ contract TicketValidator is AccessControl, EIP712, IERC1271 {
         _grantRole(VALIDATOR_ROLE, msg.sender);
     }
 
+    function addValidator(address validator) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _grantRole(VALIDATOR_ROLE, validator);
+    }
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
