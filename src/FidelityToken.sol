@@ -30,8 +30,4 @@ contract FidelityToken is ERC20, ERC20Permit, ERC20Burnable, AccessControl {
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         _mint(to, amount);
     }
-
-    function burn(uint256 amount) public {
-        _burn(msg.sender, amount);
-    }
 }
