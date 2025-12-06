@@ -7,16 +7,52 @@ import "./FidelityToken.sol";
 contract TicketingFactory {
     address[] public events;
 
-    event EventCreated(address indexed organizer, address ticket, string name, string symbol, uint256 price);
-    event LoyaltyConfigSet(address indexed ticket, address indexed loyaltyToken, uint256 rewardAmount);
-    event LoyaltyMinterGrantAttempt(address indexed loyaltyToken, address indexed ticket, bool success);
+    event EventCreated(
+        address indexed organizer,
+        address indexed ticket,
+        uint256 price
+    );
+    event LoyaltyConfigSet(
+        address indexed ticket,
+        address indexed loyaltyToken,
+        uint256 rewardAmount
+    );
+    event LoyaltyMinterGrantAttempt(
+        address indexed loyaltyToken,
+        address indexed ticket,
+        bool success
+    );
 
-    function createEvent(string memory name, string memory symbol, uint256 price, address loyaltyToken, uint256 rewardAmount, address trustedForwarder) external returns (address ticketAddress) {
+    function createEvent(
+        string memory name,
+        string memory symbol,
+        uint256 price,
+        uint256 eventMaxSupply,
+        string memory baseURI,
+        address loyaltyToken,
+        uint256 rewardAmount,
+        address trustedForwarder,
+        uint96 defaultRoyalty
+    ) external returns (address ticketAddress) {
         Ticket ticket = new Ticket(name, symbol, trustedForwarder);
 
         // Configure event with initial parameters while factory still has admin role
         ticket.setTicketPriceWei(price);
         ticket.setTreasury(payable(msg.sender));
+
+        // Configure capacity limit (0 = unlimited)
+        if (eventMaxSupply > 0) {
+            ticket.setMaxSupply(eventMaxSupply);
+        }
+
+        // Configure metadata base URI
+        if (bytes(baseURI).length > 0) {
+            ticket.setBaseURI(baseURI);
+        }
+
+        // Configure default royalty (defaults to 5% if 0)
+        uint96 royalty = defaultRoyalty > 0 ? defaultRoyalty : 500;
+        ticket.setDefaultRoyalty(msg.sender, royalty);
 
         // Give organizer pauser powers and remove factory
         bytes32 pauserRole = ticket.PAUSER_ROLE();
@@ -35,7 +71,11 @@ contract TicketingFactory {
             try token.grantRole(token.MINTER_ROLE(), address(ticket)) {
                 success = true;
             } catch {}
-            emit LoyaltyMinterGrantAttempt(loyaltyToken, address(ticket), success);
+            emit LoyaltyMinterGrantAttempt(
+                loyaltyToken,
+                address(ticket),
+                success
+            );
         }
 
         // Transfer admin to organizer and revoke from factory
@@ -47,7 +87,7 @@ contract TicketingFactory {
         ticketAddress = address(ticket);
         events.push(ticketAddress);
 
-        emit EventCreated(msg.sender, ticketAddress, name, symbol, price);
+        emit EventCreated(msg.sender, ticketAddress, price);
     }
 
     function getAllEvents() external view returns (address[] memory) {
