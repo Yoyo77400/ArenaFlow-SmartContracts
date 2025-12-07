@@ -20,15 +20,12 @@ contract ArenaRevenueSplitter is Ownable {
 
 
 
-    // Events (aligned with OpenZeppelin PaymentSplitter semantics)
+
     event PayeeAdded(address account, uint256 shares);
     event PaymentReleased(address to, uint256 amount);
     event PaymentReceived(address from, uint256 amount);
 
-    /**
-     * Constructor: initializes payees and their shares; sets deployer as owner.
-     * Payees and shares are immutable after deployment.
-     */
+ 
     constructor(address[] memory payees, uint256[] memory shares_) Ownable(msg.sender) {
         require(payees.length == shares_.length, "Splitter: length mismatch");
         require(payees.length > 0, "Splitter: no payees");
@@ -38,16 +35,11 @@ contract ArenaRevenueSplitter is Ownable {
         }
     }
 
-    /**
-     * Receive function: allows the contract to receive ETH for later release.
-     */
+
     receive() external payable {
         emit PaymentReceived(msg.sender, msg.value);
     }
 
-    // ----------------------------
-    // Public view functions
-    // ----------------------------
 
     function totalShares() external view returns (uint256) {
         return _totalShares;
@@ -74,9 +66,7 @@ contract ArenaRevenueSplitter is Ownable {
         return _pendingPayment(account, totalReceived, _released[account]);
     }
 
-    // ----------------------------
-    // Release functions (caller must be a payee)
-    // ----------------------------
+-------------------------
 
     function release() external {
         address payable account = payable(msg.sender);
@@ -94,9 +84,7 @@ contract ArenaRevenueSplitter is Ownable {
         emit PaymentReleased(account, payment);
     }
 
-    // ----------------------------
-    // Internal helpers
-    // ----------------------------
+
 
     function _addPayee(address account, uint256 shares_) internal {
         require(account != address(0), "Splitter: zero account");
