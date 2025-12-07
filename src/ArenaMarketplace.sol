@@ -58,16 +58,16 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable, IERC2981 
 
 //    function buyTicket(uint256 tokenId) external onlyRole(LISTER_ROLE) returns (bool) {
     function buyTicket(uint256 tokenId) external payable nonReentrant {
-        Listing memory item = listings[tokenId];
-        require(item.active, "Not for sale");
+        Ticket memory item = tickets[tokenId];
+        require(item.listed, "Not for sale");
         require(msg.value >= item.price, "Insufficient funds");
 
-        // Calculate fees
+        // Calculer les fees
         uint256 fee = (item.price * feeBps) / 10000;
         uint256 sellerAmount = item.price - fee;
 
         // Effects
-        listings[tokenId].active = false;
+        tickets[tokenId].listed = false;
 
         // Interactions
         (bool success1, ) = treasury.call{value: fee}("");
@@ -82,3 +82,4 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable, IERC2981 
 }
 
 
+}
