@@ -36,25 +36,20 @@ contract TicketingFactory {
     ) external returns (address ticketAddress) {
         Ticket ticket = new Ticket(name, symbol, trustedForwarder);
 
-        // Configure event with initial parameters while factory still has admin role
         ticket.setTicketPriceWei(price);
-        ticket.setTreasury(payable(msg.sender));
+        ticket.setRevenueSplitter(msg.sender);
 
-        // Configure capacity limit (0 = unlimited)
         if (eventMaxSupply > 0) {
             ticket.setMaxSupply(eventMaxSupply);
         }
 
-        // Configure metadata base URI
         if (bytes(baseURI).length > 0) {
             ticket.setBaseURI(baseURI);
         }
 
-        // Configure default royalty (defaults to 5% if 0)
         uint96 royalty = defaultRoyalty > 0 ? defaultRoyalty : 500;
         ticket.setDefaultRoyalty(msg.sender, royalty);
 
-        // Give organizer pauser powers and remove factory
         bytes32 pauserRole = ticket.PAUSER_ROLE();
         ticket.grantRole(pauserRole, msg.sender);
         ticket.revokeRole(pauserRole, address(this));

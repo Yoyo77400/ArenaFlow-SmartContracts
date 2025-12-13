@@ -28,7 +28,7 @@ contract Ticket is
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     uint256 private _tokenIdCounter;
 
-    address payable public treasury;
+    address public revenueSplitter;
     uint256 public ticketPriceWei;
 
     // Capacity limit (0 = unlimited)
@@ -59,7 +59,7 @@ contract Ticket is
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
-        treasury = payable(msg.sender);
+        revenueSplitter = address(0);
     }
 
     function _contextSuffixLength()
@@ -129,11 +129,9 @@ contract Ticket is
     }
 
     // Admin config
-    function setTreasury(
-        address payable newTreasury
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(newTreasury != address(0), "Invalid treasury");
-        treasury = newTreasury;
+    function setRevenueSplitter(address newSplitter) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(newSplitter != address(0), "Invalid splitter");
+        revenueSplitter = newSplitter;
     }
 
     function setTicketPriceWei(
@@ -233,6 +231,7 @@ contract Ticket is
         require(ticketPriceWei > 0, "Price not set");
         require(msg.value >= ticketPriceWei, "Insufficient ETH sent");
         require(maxSupply == 0 || totalSupply < maxSupply, "Sold out");
+        require(revenueSplitter != address(0), "Splitter not set");
 
         unchecked {
             _tokenIdCounter += 1;
@@ -242,9 +241,9 @@ contract Ticket is
 
         _safeMint(msg.sender, tokenId);
 
-        // Forward ETH to treasury
-        (bool ok, ) = treasury.call{value: ticketPriceWei}("");
-        require(ok, "Treasury transfer failed");
+        // Forward ETH to revenue splitter
+        (bool ok, ) = payable(revenueSplitter).call{value: ticketPriceWei}("");
+        require(ok, "Splitter transfer failed");
 
         // Refund excess ETH if any
         uint256 excess = msg.value - ticketPriceWei;
@@ -262,4 +261,7 @@ contract Ticket is
 
         emit TicketBought(msg.sender, tokenId, ticketPriceWei, address(0));
     }
+
+    // Accept ETH if sent directly
+    receive() external payable {}
 }
