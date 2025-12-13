@@ -44,7 +44,7 @@ contract TicketTest is Test {
             trustedForwarder,
             DEFAULT_ROYALTY
         );
-        ticket = Ticket(ticketAddress);
+        ticket = Ticket(payable(ticketAddress));
         vm.stopPrank();
     }
 
@@ -259,7 +259,7 @@ contract TicketTest is Test {
             0 // Should default to 500 (5%)
         );
 
-        Ticket newTicket = Ticket(newTicketAddr);
+        Ticket newTicket = Ticket(payable(newTicketAddr));
 
         // Buy a ticket
         vm.deal(buyer, 1 ether);
@@ -285,7 +285,7 @@ contract TicketTest is Test {
             1000 // 10%
         );
 
-        Ticket newTicket = Ticket(newTicketAddr);
+        Ticket newTicket = Ticket(payable(newTicketAddr));
 
         // Buy a ticket
         vm.deal(buyer, 1 ether);
@@ -365,7 +365,7 @@ contract TicketTest is Test {
             trustedForwarder,
             500
         );
-        Ticket limitedTicket = Ticket(limitedAddr);
+        Ticket limitedTicket = Ticket(payable(limitedAddr));
 
         vm.deal(buyer, 10 ether);
         vm.startPrank(buyer);
@@ -480,7 +480,7 @@ contract TicketTest is Test {
             500
         );
 
-        Ticket newTicket = Ticket(newTicketAddr);
+        Ticket newTicket = Ticket(payable(newTicketAddr));
 
         vm.deal(buyer, 1 ether);
         vm.prank(buyer);

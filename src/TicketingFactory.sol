@@ -36,25 +36,20 @@ contract TicketingFactory {
     ) external returns (address ticketAddress) {
         Ticket ticket = new Ticket(name, symbol, trustedForwarder);
 
-     
         ticket.setTicketPriceWei(price);
-        ticket.setTreasury(payable(msg.sender));
+        ticket.setRevenueSplitter(msg.sender);
 
-      
         if (eventMaxSupply > 0) {
             ticket.setMaxSupply(eventMaxSupply);
         }
 
-       
         if (bytes(baseURI).length > 0) {
             ticket.setBaseURI(baseURI);
         }
 
-       
         uint96 royalty = defaultRoyalty > 0 ? defaultRoyalty : 500;
         ticket.setDefaultRoyalty(msg.sender, royalty);
 
-      
         bytes32 pauserRole = ticket.PAUSER_ROLE();
         ticket.grantRole(pauserRole, msg.sender);
         ticket.revokeRole(pauserRole, address(this));
