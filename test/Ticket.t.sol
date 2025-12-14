@@ -375,7 +375,7 @@ contract TicketTest is Test {
         limitedTicket.buyTicket{value: TICKET_PRICE}();
 
         // Third should revert
-        vm.expectRevert("Sold out");
+        vm.expectRevert(abi.encodeWithSelector(Ticket.SoldOut.selector));
         limitedTicket.buyTicket{value: TICKET_PRICE}();
 
         vm.stopPrank();
@@ -423,7 +423,7 @@ contract TicketTest is Test {
 
         // Try to set max supply below current
         vm.prank(organizer);
-        vm.expectRevert("Max supply below current supply");
+        vm.expectRevert(abi.encodeWithSelector(Ticket.MaxSupplyBelowCurrent.selector));
         ticket.setMaxSupply(2);
     }
 
