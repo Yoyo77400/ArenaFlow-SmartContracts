@@ -51,6 +51,15 @@ contract Ticket is
     event MaxSupplyUpdated(uint256 oldMaxSupply, uint256 newMaxSupply);
     event BaseURIUpdated(string newBaseURI);
 
+    error SoldOut();
+    error InsufficientETH();
+    error SplitterNotSet();
+    error RefundFailed();
+    error TicketPriceNotSet();
+    error InvalidSplitter();
+    error MaxSupplyBelowCurrent();
+    error SpliterTransferFailed();
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -130,7 +139,7 @@ contract Ticket is
 
     // Admin config
     function setRevenueSplitter(address newSplitter) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(newSplitter != address(0), "Invalid splitter");
+        require(newSplitter != address(0), InvalidSplitter());
         revenueSplitter = newSplitter;
     }
 
@@ -154,7 +163,7 @@ contract Ticket is
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(
             newMaxSupply == 0 || newMaxSupply >= totalSupply,
-            "Max supply below current supply"
+            MaxSupplyBelowCurrent()
         );
         uint256 oldMaxSupply = maxSupply;
         maxSupply = newMaxSupply;
@@ -228,10 +237,10 @@ contract Ticket is
         nonReentrant
         returns (uint256 tokenId)
     {
-        require(ticketPriceWei > 0, "Price not set");
-        require(msg.value >= ticketPriceWei, "Insufficient ETH sent");
-        require(maxSupply == 0 || totalSupply < maxSupply, "Sold out");
-        require(revenueSplitter != address(0), "Splitter not set");
+        require(ticketPriceWei > 0, TicketPriceNotSet());
+        require(msg.value >= ticketPriceWei, InsufficientETH());
+        require(maxSupply == 0 || totalSupply < maxSupply, SoldOut());
+        require(revenueSplitter != address(0), SplitterNotSet());
 
         unchecked {
             _tokenIdCounter += 1;
@@ -243,13 +252,13 @@ contract Ticket is
 
         // Forward ETH to revenue splitter
         (bool ok, ) = payable(revenueSplitter).call{value: ticketPriceWei}("");
-        require(ok, "Splitter transfer failed");
+        require(ok, SpliterTransferFailed());
 
         // Refund excess ETH if any
         uint256 excess = msg.value - ticketPriceWei;
         if (excess > 0) {
             (ok, ) = payable(msg.sender).call{value: excess}("");
-            require(ok, "Refund failed");
+            require(ok, RefundFailed());
         }
 
         // Mint loyalty rewards (requires this contract to own FidelityToken)

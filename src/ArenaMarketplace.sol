@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
@@ -42,6 +43,14 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         uint256 price
     );
 
+    error InsufficientFunds();
+    error NotListed();
+    error NotOwner();
+    error NotSeller();
+    error SellerTransferFailed();
+    error FeeTransferFailed();
+
+
     constructor(address _ticket) {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(LISTER_ROLE, msg.sender);
@@ -50,7 +59,7 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
 
     function listTicket(uint256 tokenId, uint256 price) external {
         // validation logic
-        require(ticketContract.ownerOf(tokenId) == msg.sender, "Not owner");
+        require(ticketContract.ownerOf(tokenId) == msg.sender, NotOwner());
 
         // transfer nft -> marketplace
         ticketContract.transferFrom(msg.sender, address(this), tokenId);
@@ -61,8 +70,8 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
 
     function unlistTicket(uint256 tokenId) external {
         // validation logic
-        require(tickets[tokenId].seller == msg.sender, "Not seller");
-        require(tickets[tokenId].listed, "Not listed");
+        require(tickets[tokenId].seller == msg.sender, NotSeller());
+        require(tickets[tokenId].listed, NotListed());
         // transfer nft -> seller
         ticketContract.transferFrom(address(this), msg.sender, tokenId);
         tickets[tokenId].listed = false;
@@ -72,8 +81,8 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
     //    function buyTicket(uint256 tokenId) external onlyRole(LISTER_ROLE) returns (bool) {
     function buyTicket(uint256 tokenId) external payable nonReentrant {
         Listing memory item = tickets[tokenId];
-        require(item.listed, "Not for sale");
-        require(msg.value >= item.price, "Insufficient funds");
+        require(item.listed, NotListed());
+        require(msg.value >= item.price, InsufficientFunds());
 
         // Calculer les fees
         uint256 fee = (item.price * feeBps) / 10000;
@@ -84,10 +93,10 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
 
         // Interactions
         (bool success1, ) = treasury.call{value: fee}("");
-        require(success1, "Fee transfer failed");
+        require(success1, FeeTransferFailed());
 
         (bool success2, ) = item.seller.call{value: sellerAmount}("");
-        require(success2, "Seller transfer failed");
+        require(success2, SellerTransferFailed());
 
         ticketContract.transferFrom(address(this), msg.sender, tokenId);
 

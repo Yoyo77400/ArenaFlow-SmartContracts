@@ -21,12 +21,21 @@ contract ArenaRevenueSplitter is Ownable {
     event PaymentReleased(address to, uint256 amount);
     event PaymentReceived(address from, uint256 amount);
 
+    error SplitterZeroAccount();
+    error SplitterZeroShares();
+    error SplitterDuplicatePayee();
+    error SplitterNoShares();
+    error SplitterNothingDue();
+    error SplitterETHTransferFailed();
+    error SplitterLengthMismatch();
+    error SplitterNoPayees();
+
     constructor(
         address[] memory payees,
         uint256[] memory shares_
     ) Ownable(msg.sender) {
-        require(payees.length == shares_.length, "Splitter: length mismatch");
-        require(payees.length > 0, "Splitter: no payees");
+        require(payees.length == shares_.length, SplitterLengthMismatch());
+        require(payees.length > 0, SplitterNoPayees());
 
         for (uint256 i = 0; i < payees.length; i++) {
             _addPayee(payees[i], shares_[i]);
@@ -64,24 +73,24 @@ contract ArenaRevenueSplitter is Ownable {
 
     function release() external {
         address payable account = payable(msg.sender);
-        require(_shares[account] > 0, "Splitter: no shares");
+        require(_shares[account] > 0, SplitterNoShares());
 
         uint256 payment = releasable(account);
-        require(payment != 0, "Splitter: nothing due");
+        require(payment != 0, SplitterNothingDue());
 
         _released[account] += payment;
         _totalReleased += payment;
 
         (bool ok, ) = account.call{value: payment}("");
-        require(ok, "Splitter: ETH transfer failed");
+        require(ok, SplitterETHTransferFailed());
 
         emit PaymentReleased(account, payment);
     }
 
     function _addPayee(address account, uint256 shares_) internal {
-        require(account != address(0), "Splitter: zero account");
-        require(shares_ > 0, "Splitter: zero shares");
-        require(_shares[account] == 0, "Splitter: duplicate payee");
+        require(account != address(0), SplitterZeroAccount());
+        require(shares_ > 0, SplitterZeroShares());
+        require(_shares[account] == 0, SplitterDuplicatePayee());
 
         _payees.push(account);
         _shares[account] = shares_;
