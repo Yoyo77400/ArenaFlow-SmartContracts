@@ -65,11 +65,8 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         // transfer nft -> marketplace
         ticketContract.transferFrom(msg.sender, address(this), tokenId);
 
-<<<<<<< HEAD
-        tickets[tokenId] = Ticket(tokenId, price, msg.sender, true);
-=======
         tickets[tokenId] = Listing(tokenId, price, msg.sender, true);
->>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
+
         emit TicketListed(tokenId, price, msg.sender);
     }
 
