@@ -62,10 +62,6 @@ contract ArenaRevenueSplitter is Ownable {
         return _released[account];
     }
 
-    function payee(uint256 index) external view returns (address) {
-        return _payees[index];
-    }
-
     function releasable(address account) public view returns (uint256) {
         uint256 totalReceived = address(this).balance + _totalReleased;
         return _pendingPayment(account, totalReceived, _released[account]);
