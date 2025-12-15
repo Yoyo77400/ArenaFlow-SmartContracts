@@ -3,7 +3,6 @@ pragma solidity ^0.8.30;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-
 /**
  * @title ArenaRevenueSplitter
  * @notice Immutable revenue splitter with ETH and ERC20 release.
@@ -18,15 +17,14 @@ contract ArenaRevenueSplitter is Ownable {
     mapping(address => uint256) private _released;
     address[] private _payees;
 
-
-
-
     event PayeeAdded(address account, uint256 shares);
     event PaymentReleased(address to, uint256 amount);
     event PaymentReceived(address from, uint256 amount);
 
- 
-    constructor(address[] memory payees, uint256[] memory shares_) Ownable(msg.sender) {
+    constructor(
+        address[] memory payees,
+        uint256[] memory shares_
+    ) Ownable(msg.sender) {
         require(payees.length == shares_.length, "Splitter: length mismatch");
         require(payees.length > 0, "Splitter: no payees");
 
@@ -35,11 +33,9 @@ contract ArenaRevenueSplitter is Ownable {
         }
     }
 
-
     receive() external payable {
         emit PaymentReceived(msg.sender, msg.value);
     }
-
 
     function totalShares() external view returns (uint256) {
         return _totalShares;
@@ -66,7 +62,10 @@ contract ArenaRevenueSplitter is Ownable {
         return _pendingPayment(account, totalReceived, _released[account]);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
     function release() external {
         address payable account = payable(msg.sender);
         require(_shares[account] > 0, "Splitter: no shares");
@@ -83,8 +82,6 @@ contract ArenaRevenueSplitter is Ownable {
         emit PaymentReleased(account, payment);
     }
 
-
-
     function _addPayee(address account, uint256 shares_) internal {
         require(account != address(0), "Splitter: zero account");
         require(shares_ > 0, "Splitter: zero shares");
@@ -97,11 +94,12 @@ contract ArenaRevenueSplitter is Ownable {
         emit PayeeAdded(account, shares_);
     }
 
-    function _pendingPayment(address account, uint256 totalReceived, uint256 alreadyReleased)
-        internal
-        view
-        returns (uint256)
-    {
-        return (totalReceived * _shares[account]) / _totalShares - alreadyReleased;
+    function _pendingPayment(
+        address account,
+        uint256 totalReceived,
+        uint256 alreadyReleased
+    ) internal view returns (uint256) {
+        return
+            (totalReceived * _shares[account]) / _totalShares - alreadyReleased;
     }
 }
