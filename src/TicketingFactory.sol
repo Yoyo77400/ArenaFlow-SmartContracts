@@ -37,6 +37,10 @@ contract TicketingFactory {
         Ticket ticket = new Ticket(name, symbol, trustedForwarder);
 
         ticket.setTicketPriceWei(price);
+<<<<<<< HEAD
+        // Configure revenue splitter pointer (organizer for now; can be updated later)
+=======
+>>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
         ticket.setRevenueSplitter(msg.sender);
 
         if (eventMaxSupply > 0) {

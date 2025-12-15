@@ -55,6 +55,7 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(LISTER_ROLE, msg.sender);
         ticket = _ticket;
+        ticketContract = IERC721(_ticket);
     }
 
     function listTicket(uint256 tokenId, uint256 price) external {
@@ -64,7 +65,11 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         // transfer nft -> marketplace
         ticketContract.transferFrom(msg.sender, address(this), tokenId);
 
+<<<<<<< HEAD
+        tickets[tokenId] = Ticket(tokenId, price, msg.sender, true);
+=======
         tickets[tokenId] = Listing(tokenId, price, msg.sender, true);
+>>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
         emit TicketListed(tokenId, price, msg.sender);
     }
 
@@ -99,7 +104,12 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         require(success2, SellerTransferFailed());
 
         ticketContract.transferFrom(address(this), msg.sender, tokenId);
+<<<<<<< HEAD
+        
+        emit TicketBought(tokenId, msg.sender, item.price);
+=======
 
         emit TicketSold(tokenId, msg.sender, item.price);
     }
+>>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
 }

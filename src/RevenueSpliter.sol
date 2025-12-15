@@ -71,6 +71,10 @@ contract ArenaRevenueSplitter is Ownable {
         return _pendingPayment(account, totalReceived, _released[account]);
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
     function release() external {
         address payable account = payable(msg.sender);
         require(_shares[account] > 0, SplitterNoShares());
