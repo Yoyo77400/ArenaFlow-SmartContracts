@@ -38,7 +38,8 @@ contract TicketingFactory {
 
      
         ticket.setTicketPriceWei(price);
-        ticket.setTreasury(payable(msg.sender));
+        // Configure revenue splitter pointer (organizer for now; can be updated later)
+        ticket.setRevenueSplitter(msg.sender);
 
       
         if (eventMaxSupply > 0) {

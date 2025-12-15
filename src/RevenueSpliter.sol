@@ -66,7 +66,6 @@ contract ArenaRevenueSplitter is Ownable {
         return _pendingPayment(account, totalReceived, _released[account]);
     }
 
--------------------------
 
     function release() external {
         address payable account = payable(msg.sender);
