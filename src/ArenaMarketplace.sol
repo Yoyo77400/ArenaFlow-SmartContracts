@@ -10,7 +10,7 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
+contract ArenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
     bytes32 public constant LISTER_ROLE = keccak256("LISTER_ROLE");
     address public ticket;
     struct Listing {
@@ -101,12 +101,7 @@ contract arenaMarketPlace is AccessControl, ReentrancyGuard, Pausable {
         require(success2, SellerTransferFailed());
 
         ticketContract.transferFrom(address(this), msg.sender, tokenId);
-<<<<<<< HEAD
         
-        emit TicketBought(tokenId, msg.sender, item.price);
-=======
-
         emit TicketSold(tokenId, msg.sender, item.price);
     }
->>>>>>> c0bc19c27beeef1be572055ac287c38f0c95dec4
 }
